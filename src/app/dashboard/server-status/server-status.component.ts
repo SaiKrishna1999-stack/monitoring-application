@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, effect } from '@angular/core';
 
 @Component({
   selector: 'app-server-status',
@@ -8,9 +8,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   styleUrl: './server-status.component.css'
 })
 export class ServerStatusComponent implements OnInit, OnDestroy {
-  currentStatus: 'online' | 'offline' | 'unknown' = 'offline'; // Possible values: 'online', 'offline', 'unknown'
+  currentStatus = signal<'online' | 'offline' | 'unknown'>('offline'); // Possible values: 'online', 'offline', 'unknown'
   constructor() {
-     console.log("In Constructor");
+    effect(() => {
+      console.log("In Constructor", this.currentStatus());
+    });
   }
   private statusInterval?: ReturnType<typeof setInterval>;
 
@@ -19,11 +21,11 @@ export class ServerStatusComponent implements OnInit, OnDestroy {
       // Simulate server status changes for demonstration purposes
       const randomStatus = Math.random();
       if (randomStatus < 0.33) {
-        this.currentStatus = 'online';
+        this.currentStatus.set('online');
       } else if (randomStatus < 0.66) {
-        this.currentStatus = 'offline';
+        this.currentStatus.set('offline');
       } else {
-        this.currentStatus = 'unknown';
+        this.currentStatus.set('unknown');
       }
     }, 5000); // Change status every 5 seconds
     console.log("In Init");
@@ -32,7 +34,7 @@ export class ServerStatusComponent implements OnInit, OnDestroy {
   ngOnChanges() {
     console.log("In Changes");
   }
-  
+
   ngOnDestroy() {
     console.log("In Destroy");
     clearInterval(this.statusInterval);
